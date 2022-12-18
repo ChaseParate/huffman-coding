@@ -20,7 +20,7 @@ impl<T> Node<T> {
         }
     }
 
-    fn get_left_most_child(&self) -> &Self {
+    fn get_leftmost_child(&self) -> &Self {
         let mut node = self;
         while let Some(next_node) = &node.left {
             node = next_node.as_ref();
@@ -44,8 +44,8 @@ impl Ord for Node<u8> {
         match weight_order {
             Ordering::Equal => {
                 // Tie-Breaker
-                let self_data = self.get_left_most_child().data.unwrap();
-                let other_data = other.get_left_most_child().data.unwrap();
+                let self_data = self.get_leftmost_child().data.unwrap();
+                let other_data = other.get_leftmost_child().data.unwrap();
                 self_data.cmp(&other_data)
             }
             _ => weight_order,
@@ -141,8 +141,11 @@ pub fn compress(data: &[u8]) -> Vec<u8> {
     let encoding_map = build_encoding_map(&huffman_tree);
 
     // Build the header.
-    let mut header: Vec<u8> = counter
-        .iter()
+    let mut header: Vec<(&u8, &u32)> = counter.iter().collect();
+    header.sort();
+
+    let mut header: Vec<u8> = header
+        .into_iter()
         .flat_map(|(byte, count)| {
             let mut vec = vec![*byte];
             let mut count_vec = count.to_be_bytes().to_vec();
@@ -150,8 +153,8 @@ pub fn compress(data: &[u8]) -> Vec<u8> {
             vec
         })
         .collect();
-    let mut header_extra = vec![0; 5];
-    header.append(&mut header_extra);
+    let mut header_terminator = vec![0; 5];
+    header.append(&mut header_terminator);
 
     // Encode the data.
     let encoded_chunks: Vec<String> = data

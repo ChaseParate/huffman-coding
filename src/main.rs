@@ -11,10 +11,7 @@ fn main() {
     let compressed_data = compress(bytes);
     println!("{:?}", compressed_data);
 
-    let decompressed_data: String = decompress(&compressed_data)
-        .into_iter()
-        .map(|byte| byte as char)
-        .collect();
+    let decompressed_data: String = String::from_utf8(decompress(&compressed_data)).unwrap();
     println!("{}", decompressed_data);
 
     println!(
